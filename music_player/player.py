@@ -1,7 +1,6 @@
 from pygame import mixer
 import os
 
-
 class Player():
     def __init__(self):
         mixer.init()
