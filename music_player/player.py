@@ -4,7 +4,6 @@ from io import BytesIO
 from PIL import Image
 from pygame import mixer, error
 
-
 class Player():
     def __init__(self):
         mixer.init()
