@@ -7,23 +7,24 @@ from PIL import Image
 import PySimpleGUI as sg
 from player import Player
 
-BG_COLOR = "#01014c"
-DEFAULT_COVER = os.path.realpath("./images/cover.png")
-PREVIOUS_BUTTON = os.path.realpath("./images/previous.png")
-PLAY_BUTTON = os.path.realpath("./images/play.png")
-PAUSE_BUTTON = os.path.realpath("./images/pause.png")
-NEXT_BUTTON = os.path.realpath("./images/next.png")
-
-# region Import images as Base64
+# region Import images
 
 
-def load_image(path, size=()):
+def load_image(path, size):
     _buffer = BytesIO()
     with Image.open(path) as img:
         img = img.resize(size)
         img.save(_buffer, format="PNG")
 
         return base64.b64encode(_buffer.getvalue())
+
+
+def update_song_cover(path):
+    try:
+        return load_image(path, (200, 200))
+
+    except FileNotFoundError:
+        return DEFAULT_COVER
 
 # endregion
 
@@ -35,7 +36,7 @@ def load_settings():
         with open("./settings.json", "r") as file:
             return json.load(file)
 
-    except (FileNotFoundError):
+    except FileNotFoundError:
         return {"musics": "", "covers": ""}
 
 
@@ -47,6 +48,14 @@ def save_settings(settings):
 
 
 # region Setup
+BG_COLOR = "#01014c"
+DEFAULT_COVER = load_image(os.path.realpath("./images/cover.png"), (200, 200))
+PREVIOUS_BUTTON = load_image(
+    os.path.realpath("./images/previous.png"), (40, 40))
+PLAY_BUTTON = load_image(os.path.realpath("./images/play.png"), (72, 72))
+PAUSE_BUTTON = load_image(os.path.realpath("./images/pause.png"), (72, 72))
+NEXT_BUTTON = load_image(os.path.realpath("./images/next.png"), (40, 40))
+
 sg.theme("DarkGrey14")
 settings = load_settings()
 # endregion
@@ -76,8 +85,7 @@ def player_window():
         [
             sg.Canvas(size=(10, 210), background_color=BG_COLOR),
             sg.Frame(layout=[
-                [sg.Image(source=load_image(DEFAULT_COVER,
-                                            (200, 200)), key="-SONG_COVER-")]
+                [sg.Image(source=DEFAULT_COVER, key="-SONG_COVER-")]
             ], size=(210, 210), title="", border_width=0, background_color="white"),
             sg.Canvas(size=(10, 210), background_color=BG_COLOR)
         ],
@@ -88,11 +96,11 @@ def player_window():
 
         [
             sg.Canvas(size=(25, 64), background_color=BG_COLOR),
-            sg.Button(key="-PREV-", image_data=load_image(PREVIOUS_BUTTON, (40, 40)),
+            sg.Button(key="-PREV-", image_data=PREVIOUS_BUTTON,
                       button_color=("", BG_COLOR), mouseover_colors=("", "grey"), border_width=0),
-            sg.Button(key="-PLAY_PAUSE-", image_data=load_image(PLAY_BUTTON, (72, 72)),
+            sg.Button(key="-PLAY_PAUSE-", image_data=PLAY_BUTTON,
                       button_color=("", BG_COLOR), mouseover_colors=("", "grey"), border_width=0),
-            sg.Button(key="-NEXT-", image_data=load_image(NEXT_BUTTON, (40, 40)),
+            sg.Button(key="-NEXT-", image_data=NEXT_BUTTON,
                       button_color=("", BG_COLOR), mouseover_colors=("", "grey"), border_width=0),
             sg.Canvas(size=(25, 64), background_color=BG_COLOR)
         ]
@@ -106,6 +114,7 @@ def player_window():
 window1, window2 = settings_window(), player_window()
 window2.hide()
 player = Player()
+song_cover = DEFAULT_COVER
 
 while True:
     window, event, values = sg.read_all_windows()
@@ -122,8 +131,9 @@ while True:
             window1.close()
             window2.un_hide()
             player.play()
+            song_cover = update_song_cover(player.get_cover())
 
-        except (FileNotFoundError):
+        except FileNotFoundError:
             sg.popup("No musics found!", keep_on_top=True)
 
         settings["musics"] = values["-MUSICS-"]
@@ -142,33 +152,27 @@ while True:
     # Previous song
     elif event == "-PREV-":
         player.previous()
+        song_cover = update_song_cover(player.get_cover())
 
     # Next song
     elif event == "-NEXT-":
         player.next()
+        song_cover = update_song_cover(player.get_cover())
 
     # Show song title
     _song_title = textwrap.fill(
-        player.get_current_music(), width=30, max_lines=1, placeholder="...")
+        player.get_song_title(), width=30, max_lines=1, placeholder="...")
     window2["-SONG_TITLE-"].update(_song_title)
 
     # Show album cover
-    try:
-        window2["-SONG_COVER-"].update(source=load_image(
-            player.get_cover(default=DEFAULT_COVER), (200, 200)))
-
-    except (FileNotFoundError):
-        window2["-SONG_COVER-"].update(
-            source=load_image(DEFAULT_COVER, (200, 200)))
+    window2["-SONG_COVER-"].update(source=song_cover)
 
     # Change play button icon
     if player.is_paused():
-        window2["-PLAY_PAUSE-"].update(
-            image_data=load_image(PLAY_BUTTON, (72, 72)))
+        window2["-PLAY_PAUSE-"].update(image_data=PLAY_BUTTON)
 
     else:
-        window2["-PLAY_PAUSE-"].update(
-            image_data=load_image(PAUSE_BUTTON, (72, 72)))
+        window2["-PLAY_PAUSE-"].update(image_data=PAUSE_BUTTON)
 
 window1.close()
 window2.close()

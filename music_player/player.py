@@ -1,13 +1,17 @@
-from pygame import mixer
+import base64
 import os
+from io import BytesIO
+from PIL import Image
+from pygame import mixer, error
 
 
 class Player():
     def __init__(self):
         mixer.init()
         self.__musics_path = ""
+        self.__covers_path = ""
         self.__musics = []
-        self.__covers = {}
+        self.__covers = []
         self.__index = 0
         self.__playing = False
         self.__paused = False
@@ -16,33 +20,24 @@ class Player():
         self.__musics_path = path
         self.__musics = list(
             filter(lambda file: ".mp3" in file, os.listdir(self.__musics_path)))
+
         self.__musics.sort()
 
     def load_covers(self, path=""):
-        try:
-            _covers = list(
-                filter(lambda file: ".png" in file, os.listdir(path)))
+        self.__covers_path = path
+        self.__covers = list(
+            map(lambda song: song.replace(".mp3", ".png"), self.__musics))
 
-            for _cover in _covers:
-                self.__covers[_cover.replace(
-                    ".png", ".mp3")] = os.path.join(path, _cover)
+        self.__covers.sort()
 
-        except (FileNotFoundError):
-            pass
+    def get_song_title(self):
+        return self.__musics[self.__index]
 
-    def get_current_music(self):
-        try:
-            return self.__musics[self.__index]
+    def get_music(self):
+        return os.path.join(self.__musics_path, self.__musics[self.__index])
 
-        except (IndexError):
-            return "Song Title"
-
-    def get_cover(self, default):
-        try:
-            return self.__covers[self.get_current_music()]
-
-        except (KeyError):
-            return default
+    def get_cover(self):
+        return os.path.join(self.__covers_path, self.__covers[self.__index])
 
     def is_paused(self):
         return self.__paused
@@ -52,8 +47,7 @@ class Player():
 
         if not self.__playing:
             self.__playing = True
-            mixer.music.load(os.path.join(
-                self.__musics_path, self.__musics[self.__index]))
+            mixer.music.load(self.get_music())
             mixer.music.play(loops=-1)
 
         else:
@@ -68,11 +62,21 @@ class Player():
             self.__index -= 1
 
         self.__playing = False
-        self.play()
+
+        try:
+            self.play()
+
+        except error:
+            self.previous()
 
     def next(self):
         if self.__index < len(self.__musics) - 1:
             self.__index += 1
 
         self.__playing = False
-        self.play()
+
+        try:
+            self.play()
+
+        except error:
+            self.next()
