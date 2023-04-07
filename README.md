@@ -1,2 +1,2 @@
 # python_projects
-Python projects I made for learning purposes
+Python projects I do for learning purposes
