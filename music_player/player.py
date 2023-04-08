@@ -4,6 +4,7 @@ from io import BytesIO
 from PIL import Image
 from pygame import mixer, error
 
+
 class Player():
     def __init__(self):
         mixer.init()
@@ -56,11 +57,19 @@ class Player():
         self.__paused = True
         mixer.music.pause()
 
-    def previous(self):
-        if self.__index > 0:
-            self.__index -= 1
-
+    def reset(self):
         self.__playing = False
+        self.__index = 0
+
+        try:
+            self.play()
+
+        except error:
+            self.next()
+
+    def warp_around(self):
+        self.__playing = False
+        self.__index = len(self.__musics) - 1
 
         try:
             self.play()
@@ -68,14 +77,40 @@ class Player():
         except error:
             self.previous()
 
+    def previous(self):
+        self.__playing = False
+
+        if self.__index > 0:
+            self.__index -= 1
+
+            try:
+                self.play()
+
+            except error:
+                if self.__index == 0:
+                    self.warp_around()
+
+                else:
+                    self.previous()
+
+        else:
+            self.warp_around()
+
     def next(self):
+        self.__playing = False
+
         if self.__index < len(self.__musics) - 1:
             self.__index += 1
 
-        self.__playing = False
+            try:
+                self.play()
 
-        try:
-            self.play()
+            except error:
+                if self.__index >= len(self.__musics) - 1:
+                    self.reset()
 
-        except error:
-            self.next()
+                else:
+                    self.next()
+
+        else:
+            self.reset()
