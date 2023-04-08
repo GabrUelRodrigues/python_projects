@@ -80,14 +80,10 @@ def settings_window():
 
 def player_window():
     layout = [
-        [sg.Canvas(size=(250, 20), background_color=BG_COLOR)],
-
         [
-            sg.Canvas(size=(10, 210), background_color=BG_COLOR),
-            sg.Frame(layout=[
+            sg.Frame(title="", layout=[
                 [sg.Image(source=DEFAULT_COVER, key="-SONG_COVER-")]
-            ], size=(210, 210), title="", border_width=0, background_color="white"),
-            sg.Canvas(size=(10, 210), background_color=BG_COLOR)
+            ], pad=((25, 25), (30, 5)), size=(210, 210), border_width=0, background_color="white"),
         ],
 
         [sg.Text("Song Title...", background_color=BG_COLOR,
@@ -95,14 +91,16 @@ def player_window():
         [sg.Canvas(size=(250, 2), background_color="white")],
 
         [
-            sg.Canvas(size=(25, 64), background_color=BG_COLOR),
-            sg.Button(key="-PREV-", image_data=PREVIOUS_BUTTON,
-                      button_color=("", BG_COLOR), mouseover_colors=("", "grey"), border_width=0),
-            sg.Button(key="-PLAY_PAUSE-", image_data=PLAY_BUTTON,
-                      button_color=("", BG_COLOR), mouseover_colors=("", "grey"), border_width=0),
-            sg.Button(key="-NEXT-", image_data=NEXT_BUTTON,
-                      button_color=("", BG_COLOR), mouseover_colors=("", "grey"), border_width=0),
-            sg.Canvas(size=(25, 64), background_color=BG_COLOR)
+            sg.Frame(title="", layout=[
+                [
+                    sg.Button(key="-PREV-", image_data=PREVIOUS_BUTTON,
+                              button_color=("", BG_COLOR), mouseover_colors=("", "grey"), border_width=0),
+                    sg.Button(key="-PLAY_PAUSE-", image_data=PLAY_BUTTON,
+                              button_color=("", BG_COLOR), mouseover_colors=("", "grey"), border_width=0),
+                    sg.Button(key="-NEXT-", image_data=NEXT_BUTTON,
+                              button_color=("", BG_COLOR), mouseover_colors=("", "grey"), border_width=0)
+                ]
+            ], pad=((35, 35), (10, 10)), border_width=0, background_color=BG_COLOR)
         ]
     ]
 
