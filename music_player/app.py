@@ -48,6 +48,7 @@ def save_settings(settings):
 
 
 # region Setup
+SCREEN_REFRESH = int(1000 / 60)
 BG_COLOR = "#01014c"
 DEFAULT_COVER = load_image(os.path.realpath("./images/cover.png"), (200, 200))
 PREVIOUS_BUTTON = load_image(
@@ -115,7 +116,7 @@ player = Player()
 song_cover = DEFAULT_COVER
 
 while True:
-    window, event, values = sg.read_all_windows(timeout=1)
+    window, event, values = sg.read_all_windows(timeout=SCREEN_REFRESH)
 
     # Exit program
     if event == sg.WIN_CLOSED or event == "Exit":
