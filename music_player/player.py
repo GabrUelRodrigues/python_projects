@@ -1,7 +1,4 @@
-import base64
 import os
-from io import BytesIO
-from PIL import Image
 from pygame import mixer, error
 
 
