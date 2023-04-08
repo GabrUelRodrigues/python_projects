@@ -111,8 +111,8 @@ def player_window():
 
 
 # region Event loop
-window1, window2 = settings_window(), player_window()
-window2.hide()
+window1, window2 = settings_window(), None
+# window2.hide()
 player = Player()
 song_cover = DEFAULT_COVER
 
@@ -129,7 +129,7 @@ while True:
             player.load_musics(values["-MUSICS-"])
             player.load_covers(values["-COVERS-"])
             window1.close()
-            window2.un_hide()
+            window2 = player_window()
             player.play()
             song_cover = update_song_cover(player.get_cover())
 
