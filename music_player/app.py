@@ -117,7 +117,7 @@ player = Player()
 song_cover = DEFAULT_COVER
 
 while True:
-    window, event, values = sg.read_all_windows()
+    window, event, values = sg.read_all_windows(timeout=1)
 
     # Exit program
     if event == sg.WIN_CLOSED or event == "Exit":
@@ -159,21 +159,30 @@ while True:
         player.next()
         song_cover = update_song_cover(player.get_cover())
 
-    # Show song title
-    _song_title = textwrap.fill(
-        player.get_song_title(), width=30, max_lines=1, placeholder="...")
-    window2["-SONG_TITLE-"].update(_song_title)
+    if window2:
+        # Go to next song automaticaly
+        if player.get_playtime() >= player.get_song_length():
+            player.next()
+            song_cover = update_song_cover(player.get_cover())
 
-    # Show album cover
-    window2["-SONG_COVER-"].update(source=song_cover)
+        # Show song title
+        _song_title = textwrap.fill(
+            player.get_song_title(), width=30, max_lines=1, placeholder="...")
+        window2["-SONG_TITLE-"].update(_song_title)
 
-    # Change play button icon
-    if player.is_paused():
-        window2["-PLAY_PAUSE-"].update(image_data=PLAY_BUTTON)
+        # Show album cover
+        window2["-SONG_COVER-"].update(source=song_cover)
 
-    else:
-        window2["-PLAY_PAUSE-"].update(image_data=PAUSE_BUTTON)
+        # Change play button icon
+        if player.is_paused():
+            window2["-PLAY_PAUSE-"].update(image_data=PLAY_BUTTON)
+
+        else:
+            window2["-PLAY_PAUSE-"].update(image_data=PAUSE_BUTTON)
 
 window1.close()
-window2.close()
+
+if window2:
+    window2.close()
+
 # endregion
