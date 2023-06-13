@@ -8,9 +8,7 @@ import PySimpleGUI as sg
 from player import Player
 
 # region Import images
-
-
-def load_image(path, size):
+def load_image(path, size) -> bytes:
     _buffer = BytesIO()
     with Image.open(path) as img:
         img = img.resize(size)
@@ -19,19 +17,16 @@ def load_image(path, size):
         return base64.b64encode(_buffer.getvalue())
 
 
-def update_song_cover(path):
+def update_song_cover(path) -> bytes:
     try:
         return load_image(path, (200, 200))
 
     except FileNotFoundError:
         return DEFAULT_COVER
-
 # endregion
 
 # region Save and Load settings
-
-
-def load_settings():
+def load_settings() -> dict[str, str]:
     try:
         with open("./settings.json", "r") as file:
             return json.load(file)
@@ -40,36 +35,30 @@ def load_settings():
         return {"musics": "", "covers": ""}
 
 
-def save_settings(settings):
+def save_settings(settings) -> None:
     with open("./settings.json", "w") as file:
         json.dump(settings, file)
-
 # endregion
 
 
 # region Setup
 SCREEN_REFRESH = int(1000 / 60)
 BG_COLOR = "#01014c"
-DEFAULT_COVER = load_image(os.path.realpath("./images/cover.png"), (200, 200))
-PREVIOUS_BUTTON = load_image(
-    os.path.realpath("./images/previous.png"), (40, 40))
-PLAY_BUTTON = load_image(os.path.realpath("./images/play.png"), (72, 72))
-PAUSE_BUTTON = load_image(os.path.realpath("./images/pause.png"), (72, 72))
-NEXT_BUTTON = load_image(os.path.realpath("./images/next.png"), (40, 40))
+DEFAULT_COVER: bytes = load_image(os.path.realpath("./images/cover.png"), (200, 200))
+PREVIOUS_BUTTON: bytes = load_image(os.path.realpath("./images/previous.png"), (40, 40))
+PLAY_BUTTON: bytes = load_image(os.path.realpath("./images/play.png"), (72, 72))
+PAUSE_BUTTON: bytes = load_image(os.path.realpath("./images/pause.png"), (72, 72))
+NEXT_BUTTON: bytes = load_image(os.path.realpath("./images/next.png"), (40, 40))
 
 sg.theme("DarkGrey14")
-settings = load_settings()
+settings: dict[str, str] = load_settings()
 # endregion
 
 # region Settings window
-
-
-def settings_window():
+def settings_window() -> sg.Window:
     layout = [
-        [sg.Text("Musics:"), sg.Input(key="-MUSICS-", size=(25, 1),
-                                      default_text=settings["musics"]), sg.FolderBrowse(initial_folder="./")],
-        [sg.Text("Covers:"), sg.Input(key="-COVERS-", size=(25, 1),
-                                      default_text=settings["covers"]), sg.FolderBrowse(initial_folder="./")],
+        [sg.Text("Musics:"), sg.Input(key="-MUSICS-", size=(25, 1),default_text=settings["musics"]), sg.FolderBrowse(initial_folder="./")],
+        [sg.Text("Covers:"), sg.Input(key="-COVERS-", size=(25, 1),default_text=settings["covers"]), sg.FolderBrowse(initial_folder="./")],
         [sg.Button("Exit"), sg.Button("Accept")]
     ]
 
@@ -77,9 +66,7 @@ def settings_window():
 # endregion
 
 # region Player window
-
-
-def player_window():
+def player_window() -> sg.Window:
     layout = [
         [
             sg.Frame(title="", layout=[
@@ -94,12 +81,9 @@ def player_window():
         [
             sg.Frame(title="", layout=[
                 [
-                    sg.Button(key="-PREV-", image_data=PREVIOUS_BUTTON,
-                              button_color=("", BG_COLOR), mouseover_colors=("", "grey"), border_width=0),
-                    sg.Button(key="-PLAY_PAUSE-", image_data=PLAY_BUTTON,
-                              button_color=("", BG_COLOR), mouseover_colors=("", "grey"), border_width=0),
-                    sg.Button(key="-NEXT-", image_data=NEXT_BUTTON,
-                              button_color=("", BG_COLOR), mouseover_colors=("", "grey"), border_width=0)
+                    sg.Button(key="-PREV-", image_data=PREVIOUS_BUTTON,button_color=("", BG_COLOR), mouseover_colors=("", "grey"), border_width=0),
+                    sg.Button(key="-PLAY_PAUSE-", image_data=PLAY_BUTTON, button_color=("", BG_COLOR), mouseover_colors=("", "grey"),border_width=0),
+                    sg.Button(key="-NEXT-", image_data=NEXT_BUTTON,button_color=("", BG_COLOR), mouseover_colors=("", "grey"), border_width=0)
                 ]
             ], pad=((35, 35), (10, 10)), border_width=0, background_color=BG_COLOR)
         ]
@@ -111,9 +95,8 @@ def player_window():
 
 # region Event loop
 window1, window2 = settings_window(), None
-# window2.hide()
 player = Player()
-song_cover = DEFAULT_COVER
+song_cover: bytes = DEFAULT_COVER
 
 while True:
     window, event, values = sg.read_all_windows(timeout=SCREEN_REFRESH)
@@ -165,7 +148,7 @@ while True:
             song_cover = update_song_cover(player.get_cover())
 
         # Show song title
-        _song_title = textwrap.fill(
+        _song_title: str = textwrap.fill(
             player.get_song_title(), width=30, max_lines=1, placeholder="...")
         window2["-SONG_TITLE-"].update(_song_title)
 
@@ -183,5 +166,4 @@ window1.close()
 
 if window2:
     window2.close()
-
 # endregion
